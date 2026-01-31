@@ -23,7 +23,6 @@ def getFishCsv():
 def selectFish():
     df = getFishCsv()
     selectedFish = df.sample(n=10)["Name"].tolist()
-
     return selectedFish
 
 def updateFishLocations(fishes: list[Fish], tick_count: int):
