@@ -213,22 +213,51 @@ a.secondary {
   );
 }
 
-.fishName {
+.fishInfo {
   position: absolute;
-  left: 12px;
+  left: 0;
   top: 50%;
   transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: linear-gradient(
+    90deg,
+    rgba(0, 77, 128, 0.95) 0%,
+    rgba(0, 119, 190, 0.9) 100%
+  );
+  padding: 8px 16px;
+  border-radius: 0 8px 8px 0;
+  box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+  z-index: 20;
+  transition: left 0.5s ease-in-out;
+}
+
+.fishInfoHidden {
+  left: -200px;
+}
+
+.fishName {
   color: #fff;
   font-size: 14px;
   font-weight: 600;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
   white-space: nowrap;
-  z-index: 10;
+}
+
+.fishOdds {
+  color: #01f9c6;
+  font-size: 13px;
+  font-weight: 700;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 2px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
 }
 
 .fishSprite {
   position: absolute;
-  left: 140px;
+  left: 20px;
   top: 50%;
   transform: translateY(-50%);
   object-fit: contain;
@@ -242,4 +271,30 @@ a.secondary {
   100% {
     background-position: 200% 0;
   }
+}
+
+.actionButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  height: auto;
+  background-color: #26c6da;
+  color: #01f9c6;
+  padding: 12px 32px;
+  border: none;
+  border-radius: 128px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
+  margin: 8px;
+  white-space: nowrap;
+}
+
+.actionButton:hover {
+  background-color: #333;
+  color: #01f9c6;
 }
