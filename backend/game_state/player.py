@@ -5,7 +5,7 @@ class Player:
     # iterable player id
     iter_id = itertools.count()
 
-    id: str
+    # id: str
     username: str
     balance: float
     is_locked: bool
