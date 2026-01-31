@@ -27,11 +27,11 @@ def selectFish():
 
 def main():
 
-    # fishes = selectFish()
+    fishes = selectFish()
 
-    # for fish in fishes:
-    #     Fish(fish, 0)
-
+    for fish in fishes:
+        Fish(fish, 0)
+    
 
     player1 = Player("test1")
     player1.place_bet(100)
