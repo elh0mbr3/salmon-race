@@ -13,6 +13,14 @@ export default function Home() {
           height={20}
           priority
         />
+        <Image
+          className={styles.projectLogo}
+          src="/icon.png"
+          alt="Salmon Race Logo"
+          width={227}
+          height={157}
+          priority
+        />
         <div className={styles.intro}>
           <h1>To get started, edit the page.tsx file.</h1>
           <p>
