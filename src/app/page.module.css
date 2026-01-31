@@ -243,3 +243,29 @@ a.secondary {
     background-position: 200% 0;
   }
 }
+
+.actionButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  height: auto;
+  background-color: #26c6da;
+  color: #01f9c6;
+  padding: 12px 32px;
+  border: none;
+  border-radius: 128px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
+  margin: 8px;
+  white-space: nowrap;
+}
+
+.actionButton:hover {
+  background-color: #333;
+  color: #01f9c6;
+}
