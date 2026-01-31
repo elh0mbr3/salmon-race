@@ -3,11 +3,11 @@ from bet import Bet
 class Fish():
     fish_name : str
     player_bets : list[Bet]
-    x_position : int
+    x_position : float
 
-    def __init__(self, fish_name: str, player_bets: Bet):
+    def __init__(self, fish_name: str):
         self.fish_name = fish_name
-        self.player_bets = [player_bets]
+        self.player_bets = []
         self.x_position = 0
 
     def getName(self):
