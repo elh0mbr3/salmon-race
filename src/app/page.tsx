@@ -22,10 +22,14 @@ export default function Home() {
             <div className={styles.lane} />
             <div className={styles.lane} />
             <div className={styles.lane} />
+            <div className={styles.lane} />
+            <div className={styles.lane} />
+            <div className={styles.lane} />
+            <div className={styles.lane} />
           </div>
         </div>
         <div>
-          <Buttons/>
+          <Buttons />
         </div>
       </main>
     </div>
