@@ -9,29 +9,30 @@ import salmon1 from "./assets/pictures of salmon/1.png";
 import salmon2 from "./assets/pictures of salmon/2.png";
 import salmon3 from "./assets/pictures of salmon/3.png";
 import salmon4 from "./assets/pictures of salmon/4.png";
+import salmon5 from "./assets/pictures of salmon/5.png";
 
 const spriteMap: { [key: number]: typeof salmon1 } = {
   1: salmon1,
   2: salmon2,
   3: salmon3,
   4: salmon4,
+  5: salmon5,
 };
 
-// fish data from CSV (excluding header)
-const fishData = [
-  { name: "Holy Carp", odds: 0.04, sprite: 1 },
-  { name: "Gar Licbread", odds: 0.2, sprite: 2 },
-  { name: "Eel Pie", odds: 0.4, sprite: 3 },
-  { name: "Ray Parker Jr.", odds: 0.33, sprite: 1 },
-  { name: "Jack Dempsey", odds: 0.17, sprite: 3 },
-  { name: "Red Herring", odds: 0.5, sprite: 4 },
-  { name: "Holy Mackarel", odds: 0.07, sprite: 2 },
-  { name: "Marlin Brando", odds: 0.43, sprite: 3 },
-  { name: "Jackson Pollock", odds: 0.25, sprite: 2 },
-  { name: "Scatman John", odds: 0.1, sprite: 4 },
-  { name: "That's a moray", odds: 0.5, sprite: 4 },
-  { name: "The old billfish", odds: 0.32, sprite: 1 },
-];
+type FishData = { name: string; odds: number; sprite: number };
+
+function parseCSV(csv: string): FishData[] {
+  const lines = csv.trim().split("\n");
+  // skipping header row
+  return lines.slice(1).map((line) => {
+    const [name, odds, sprite] = line.split(",");
+    return {
+      name: name.trim(),
+      odds: parseFloat(odds),
+      sprite: parseInt(sprite, 10),
+    };
+  });
+}
 
 // Fisher-Yates shuffle algorithm
 function shuffleArray<T>(array: T[]): T[] {
@@ -44,13 +45,18 @@ function shuffleArray<T>(array: T[]): T[] {
 }
 
 export default function Home() {
-  const [selectedFish, setSelectedFish] = useState<typeof fishData>([]);
+  const [selectedFish, setSelectedFish] = useState<FishData[]>([]);
   const [raceStarted, setRaceStarted] = useState(false);
 
   useEffect(() => {
-    const shuffled = shuffleArray(fishData);
-    const selected = shuffled.slice(0, 10);
-    setSelectedFish(selected);
+    fetch("/fish.csv")
+      .then((response) => response.text())
+      .then((csv) => {
+        const fishData = parseCSV(csv);
+        const shuffled = shuffleArray(fishData);
+        const selected = shuffled.slice(0, 10);
+        setSelectedFish(selected);
+      });
   }, []);
 
   const handleStartRace = () => {
