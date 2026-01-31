@@ -1,13 +1,7 @@
 :root {
   --background: #ffffff;
   --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  color-scheme: light;
 }
 
 html,
@@ -39,4 +33,17 @@ a {
   html {
     color-scheme: dark;
   }
+}
+
+button {
+  height: 50px;
+  width: 100px;
+  font-weight: bolder;
+  color:palevioletred;
+  background-color: red;
+}
+
+button:active {
+  color:red;
+  background-color: palevioletred;
 }
