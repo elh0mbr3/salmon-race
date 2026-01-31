@@ -29,6 +29,10 @@
   padding: 120px 60px;
 }
 
+.projectLogo {
+  margin-bottom: 24px;
+}
+
 .intro {
   display: flex;
   flex-direction: column;
