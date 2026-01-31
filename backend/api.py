@@ -14,7 +14,6 @@ def blank():
 def page(file):
     return "<p>"+file+"</p>"
 
-<<<<<<< HEAD
 # for creating a player
 @app.route("/api/sendUname", methods=['GET'])
 def sendUname():
@@ -51,12 +50,10 @@ def sendBet():
 
 if __name__ == "__main__":
     app.run(port=5000, debug=True)
-=======
-@app.route("/test/<sendUname>")
-def sendUname(sendUname):
-    return "<p>username: "+sendUname+"</p>"
+# @app.route("/test/<sendUname>")
+# def sendUname(sendUname):
+#     return "<p>username: "+sendUname+"</p>"
 
 
-if __name__ == "__main__":
-    app.run(debug=True)
->>>>>>> d0368803b006cd4aad8025ac5646085db63df90a
+# if __name__ == "__main__":
+#     app.run(debug=True)
