@@ -35,3 +35,12 @@ class Player:
 
     def getBet(self):
         return self.player_bet
+    
+    def Username(self):
+        return self.username
+    
+    def getBalance(self):
+        return self.balance
+    
+    def getIsLocked(self):
+        return self.is_locked

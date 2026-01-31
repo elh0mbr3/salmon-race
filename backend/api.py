@@ -10,8 +10,10 @@ def blank():
 def page(file):
     return "<p>"+file+"</p>"
 
-@app.route("/sendUname")
-def sendUname():
-    #create Player object
+@app.route("/test/<sendUname>")
+def sendUname(sendUname):
+    return "<p>username: "+sendUname+"</p>"
 
-def 
+
+if __name__ == "__main__":
+    app.run(debug=True)
