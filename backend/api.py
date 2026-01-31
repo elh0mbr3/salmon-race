@@ -26,24 +26,33 @@ def selectFish():
     df = getFishCsv()
 
     if df is None:
-        return []
+        return None
 
     n = min(10, len(df))
-    selectedFish = df.sample(n=n)[["Name", "Odds", "Sprite"]].to_dict('records')
-    return selectedFish
+    if n == 0:
+        return None
+    return df.sample(n=n)
 
 def updateFishLocations(fishes: list[Fish], tick_count: int):
     for fish in fishes:
-        base_speed = (1 / fish.odds) * 50
-        random_multiplier = np.random.uniform(0.5, 1.5)
-        movement = base_speed * random_multiplier * tick_count
+        random_multiplier = np.random.random()
+        movement = 10 * random_multiplier * fish.normalised_odds
         fish.setXPosition(fish.getXPosition() + movement)
 
 def calculateAllFinished(fishes: list[Fish]):
+    num_finished = 0
+
     for fish in fishes:
-        if fish.getXPosition() < 5000:
-            return False
-    return True
+        if fish.getXPosition() >= 100:
+            num_finished += 1
+
+    if num_finished >= 3:
+        return True
+    
+    if num_finished == len(fishes):
+        return True
+
+    return False
 
 # --- API ROUTES/CALLS ---
 
@@ -92,16 +101,30 @@ def sendBet():
         
 @app.route("/api/startRace", methods=["GET"])
 def startRace():
+    df_selected = selectFish()
 
-    fish_data = selectFish()
-    if not fish_data:
+    if df_selected is None or df_selected.empty:
         return "<p>Error: fish.csv is missing or empty</p>"
+    
+    oddsNp = df_selected["Odds"].to_numpy()
+
+    range_val = oddsNp.max() - oddsNp.min()
+    if range_val == 0:
+        normOdds = np.full_like(oddsNp, 0.5)
+    else:
+        normOdds = (oddsNp - oddsNp.min()) / range_val
+    
+    normOdds += 0.05
+
+    df_selected["NormOdds"] = normOdds
+
+    fish_data = df_selected[["Name", "Odds", "Sprite", "NormOdds"]].to_dict('records')
     current_fishes = []
     for data in fish_data:
         f = Fish(data["Name"])
         f.odds = float(data["Odds"])
+        f.normalised_odds = float(data["NormOdds"])
         f.sprite = data["Sprite"]
-
         current_fishes.append(f)
 
     tick_count = 0
