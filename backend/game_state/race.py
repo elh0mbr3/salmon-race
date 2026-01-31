@@ -1,4 +1,6 @@
 from enum import Enum
+from player import Player
+from bet import Bet
 
 class BetType(Enum):
     WIN = "win"
@@ -7,7 +9,7 @@ class BetType(Enum):
 
 class Race:
     betType = BetType
-    players = []
+    bets: Bet = []
 
     def setBetType(type):
         betType = type
@@ -15,6 +17,7 @@ class Race:
     def setStake(s):
         stake = s
 
-class Player():
-    fishName = str
-    stake = float
+
+
+
+    
