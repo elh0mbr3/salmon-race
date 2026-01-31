@@ -17,5 +17,10 @@ export default function Buttons(){
                 }}>
                     Place a bet
                 </button>
+                <button onClick={() => {
+                    console.log('Go')
+                }}>
+                    Start the race
+                </button>
             </div>)
 }
