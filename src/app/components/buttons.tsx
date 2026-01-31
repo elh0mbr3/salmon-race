@@ -3,7 +3,12 @@
 import React from "react";
 import styles from "../page.module.css";
 
-export default function Buttons() {
+interface ButtonsProps {
+  onStartRace: () => void;
+  raceStarted: boolean;
+}
+
+export default function Buttons({ onStartRace, raceStarted }: ButtonsProps) {
   var thingymajiggywhatchamacallit;
   return (
     <div>
@@ -26,14 +31,17 @@ export default function Buttons() {
             }
           }
         }}
+        disabled={raceStarted}
       >
         Place a bet
       </button>
       <button
         className={styles.actionButton}
         onClick={() => {
+          onStartRace();
           console.log("Go");
         }}
+        disabled={raceStarted}
       >
         Start the race
       </button>
