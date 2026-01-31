@@ -45,12 +45,17 @@ function shuffleArray<T>(array: T[]): T[] {
 
 export default function Home() {
   const [selectedFish, setSelectedFish] = useState<typeof fishData>([]);
+  const [raceStarted, setRaceStarted] = useState(false);
 
   useEffect(() => {
     const shuffled = shuffleArray(fishData);
     const selected = shuffled.slice(0, 10);
     setSelectedFish(selected);
   }, []);
+
+  const handleStartRace = () => {
+    setRaceStarted(true);
+  };
 
   return (
     <div className={styles.page}>
@@ -67,7 +72,14 @@ export default function Home() {
           <div className={styles.lanes}>
             {selectedFish.map((fish, index) => (
               <div key={index} className={styles.lane}>
-                <span className={styles.fishName}>{fish.name}</span>
+                <div
+                  className={`${styles.fishInfo} ${raceStarted ? styles.fishInfoHidden : ""}`}
+                >
+                  <span className={styles.fishName}>{fish.name}</span>
+                  <span className={styles.fishOdds}>
+                    {(fish.odds * 100).toFixed(0)}%
+                  </span>
+                </div>
                 <Image
                   className={styles.fishSprite}
                   src={spriteMap[fish.sprite]}
@@ -80,7 +92,7 @@ export default function Home() {
           </div>
         </div>
         <div>
-          <Buttons />
+          <Buttons onStartRace={handleStartRace} raceStarted={raceStarted} />
         </div>
       </main>
     </div>
