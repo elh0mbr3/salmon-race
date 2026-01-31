@@ -1,24 +1,36 @@
-# hackaway-project-01
-The project designed and implemented for The Royal Hackaway 2025
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## For developers:
-- `requirements.txt` don't have any dependencies yet (W.I.P)
-- Use the official GitHub page of this repository (project) to track the list of issues as they are tasks required to complete to achieve primary project goals.
-- The primary idea of the project is not finalised yet, so the current repository might face several major changes.
-- Have fun and don't forget about regular breaks!
+## Getting Started
 
-### To get started:
-1. Find a folder where you store your projects (for convenience)
-2. Use these commands to clone a git repository:
+First, run the development server:
+
+```bash
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
 ```
-git clone https://github.com/elh0mbr3/hackaway-project-01.git
-git pull
-```
-3. For contributing:
-- `git add [filename].[type]` to add a specific file or `git add .` to add all files modified/added (be careful with the last one).
-- `git commit -m "[your commit message]"`
-(!) Recommended to use imperative verbs. For instance, `Add README.md for the purpose of documentation`.
-- `git push` to push all of the changes to the main branch (both on local and remote Git repositories).
 
-## Lists of contributors (participants):
-not ready yet
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+
+## Learn More
+
+To learn more about Next.js, take a look at the following resources:
+
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+
+## Deploy on Vercel
+
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
