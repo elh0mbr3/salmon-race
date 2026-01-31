@@ -5,6 +5,18 @@ import styles from "./page.module.css";
 import Buttons from "./components/buttons";
 import { useState, useEffect } from "react";
 
+import salmon1 from "./assets/pictures of salmon/1.png";
+import salmon2 from "./assets/pictures of salmon/2.png";
+import salmon3 from "./assets/pictures of salmon/3.png";
+import salmon4 from "./assets/pictures of salmon/4.png";
+
+const spriteMap: { [key: number]: typeof salmon1 } = {
+  1: salmon1,
+  2: salmon2,
+  3: salmon3,
+  4: salmon4,
+};
+
 // fish data from CSV (excluding header)
 const fishData = [
   { name: "Holy Carp", odds: 0.04, sprite: 1 },
@@ -58,7 +70,7 @@ export default function Home() {
                 <span className={styles.fishName}>{fish.name}</span>
                 <Image
                   className={styles.fishSprite}
-                  src={`/pictures of salmon/${fish.sprite}.png`}
+                  src={spriteMap[fish.sprite]}
                   alt={fish.name}
                   width={80}
                   height={40}
