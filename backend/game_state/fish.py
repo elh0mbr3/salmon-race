@@ -1,8 +1,8 @@
-from bet import Bet
+# from bet import Bet
 
 class Fish():
     fish_name : str
-    player_bets : list[Bet]
+    player_bets : list[str] #Bet]
     x_position : float
 
     def __init__(self, fish_name: str):
@@ -22,5 +22,5 @@ class Fish():
     def setXPosition(self, new_x_position: int):
         self.x_position = new_x_position
 
-    def addBet(self, new_bet: Bet):
+    def addBet(self, new_bet: str): #Bet):
         self.player_bets.append(new_bet)
