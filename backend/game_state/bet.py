@@ -1,16 +1,21 @@
-from player import Player
-from fish import Fish
-import random
+# from player import Player
+# from fish import Fish
+import itertools
 
 class Bet:
-    id: str
-    player: Player
-    stake: float
-    bet_on: Fish
+    iter_id = itertools.count()
 
-    def __init__(self, player: Player, bet_on: Fish, stake: float):
-        self.id = random(0, 1000) # for testing purposes
-        self.player = player
-        self.bet_on = bet_on
+    id: str
+    # player: Player
+    stake: float
+    # bet_on: Fish
+
+    def __init__(self, stake: float):
+        self.id = self.iter_id # for testing purposes
+        # self.player = player
+        # self.bet_on = bet_on
         self.stake = stake
+
+    def getStake(self):
+        return self.stake
     

@@ -9,3 +9,9 @@ def blank():
 @app.route("/<file>")
 def page(file):
     return "<p>"+file+"</p>"
+
+@app.route("/sendUname")
+def sendUname():
+    #create Player object
+
+def 

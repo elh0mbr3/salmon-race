@@ -1,6 +1,6 @@
 from enum import Enum
 from player import Player
-from bet import Bet
+from fish import Fish
 
 class BetType(Enum):
     WIN = "win"
@@ -8,16 +8,20 @@ class BetType(Enum):
     EACH_WAY = "each_way"
 
 class Race:
-    betType = BetType
-    bets: Bet = []
+    player: Player
+    fish: list[Fish]
+    bet_type: BetType
 
-    def setBetType(type):
-        betType = type
+    def __init__(self, player: Player, fish : list[Fish], betType : BetType):
+        self.player = player
+        self.fish = fish
+        self.bet_type = betType
 
-    def setStake(s):
-        stake = s
-
-
-
-
+    def getPlayer(self):
+        return self.player
     
+    def getFish(self):
+        return self.fish
+    
+    def getBetType(self):
+        return self.bet_type
