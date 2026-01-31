@@ -5,7 +5,7 @@ import itertools
 class Bet:
     iter_id = itertools.count()
 
-    id: str
+    # id: str
     # player: Player
     stake: float
     # bet_on: Fish
@@ -18,4 +18,7 @@ class Bet:
 
     def getStake(self):
         return self.stake
+    
+    # def getPlayer(self):
+    #     return self.player
     

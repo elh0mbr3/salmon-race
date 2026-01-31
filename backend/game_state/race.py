@@ -20,8 +20,17 @@ class Race:
     def getPlayer(self):
         return self.player
     
-    def getFish(self):
+    def getAllFish(self):
         return self.fish
-    
+
+    def getFishByName(self, fish_name: str):
+        for f in self.fish:
+            if f.getName() == fish_name:
+                return f
+        return None
+
     def getBetType(self):
         return self.bet_type
+    
+    def addFish(self, fish: Fish):
+        self.fish.append(fish)
