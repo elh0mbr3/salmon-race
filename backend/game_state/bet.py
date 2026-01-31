@@ -19,3 +19,6 @@ class Bet:
     def getStake(self):
         return self.stake
     
+    # def getPlayer(self):
+    #     return self.player
+    

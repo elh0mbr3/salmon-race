@@ -234,7 +234,7 @@ a.secondary {
 }
 
 .fishInfoHidden {
-  left: -200px;
+  left: -400px;
 }
 
 .fishName {
@@ -280,7 +280,7 @@ a.secondary {
   width: fit-content;
   height: auto;
   background-color: #26c6da;
-  color: #01f9c6;
+  color: #333;
   padding: 12px 32px;
   border: none;
   border-radius: 128px;
