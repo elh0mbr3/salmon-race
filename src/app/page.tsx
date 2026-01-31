@@ -7,7 +7,7 @@ export default function Home() {
       <main className={styles.main}>
         <Image
           className={styles.projectLogo}
-          src="/icon.png"
+          src="/logo.png"
           alt="Salmon Race Logo"
           width={227}
           height={157}
