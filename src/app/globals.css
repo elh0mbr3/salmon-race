@@ -28,3 +28,22 @@ a {
   color: inherit;
   text-decoration: none;
 }
+
+@media (prefers-color-scheme: dark) {
+  html {
+    color-scheme: dark;
+  }
+}
+
+button {
+  height: 50px;
+  width: 100px;
+  font-weight: bolder;
+  color:palevioletred;
+  background-color: red;
+}
+
+button:active {
+  color:red;
+  background-color: palevioletred;
+}
