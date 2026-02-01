@@ -89,6 +89,11 @@ export default function Buttons({
 
   return (
     <div>
+      <select id="bet_type">
+        <option value="win">Win</option>
+        <option value="place">Place</option>
+        <option value="each_way">Each Way</option>
+      </select>
       <button
         className={styles.actionButton}
         onClick={handlePlaceBet}
