@@ -3,20 +3,22 @@ import time
 import numpy as np
 import pandas as pd
 from pathlib import Path
-from flask import Flask, request, session
+from flask import Flask, request, session, jsonify
 
 # importing classes
-from game_state.player import Player
+from game_state.player import Player, BetType # added to
 from game_state.fish import Fish
 # from game_state.race import Race, BetType
 
 app = Flask(__name__)
 
 active_players = {}
+active_race_data = []
 # user = ""
 
 def getFishCsv():
-    filePath = Path("../fish.csv")
+    base_path = Path(__file__).parent.resolve()
+    filePath = base_path / ".." / "fish.csv"
     if not filePath.exists():
         return None
     df = pd.read_csv(filePath)
@@ -53,6 +55,49 @@ def calculateAllFinished(fishes: list[Fish]):
 
     return False
 
+# updat the fish odds in the csv file based on their finishing positions
+def updateCsvOdds(fishes: list[Fish]):
+    df = getFishCsv()
+  
+    # given a sigmoid distribution of fish positions, calculate new odds
+    newOdds = []
+    for pos in range(len(fishes)):
+        newOdds.append((0.1 * np.tanh(0.8*(5 - pos))))
+    
+    #find odds missing in program and copy across csv odds
+    for i, fish in enumerate(fishes):
+        for index, row in df.iterrows():
+            if row["Name"] == fish.getName():
+                df.loc[index, "Odds"] = min(0.5, abs(fish.getOdds() + newOdds[i]) + 0.05)  # never go above 0.5
+    print(f"[DEBUG] Updated odds:\n{df}\n")
+    df.to_csv(Path("../fish.csv"), index=False) # overwrites the original csv file
+    return df
+
+def process_payouts(winning_fish_name, winning_odds):
+    print(f"\n[DEBUG] --- PROCESSING PAYOUTS ---")
+    print(f"[DEBUG] Winner: '{winning_fish_name}' | Odds: {winning_odds}")
+
+    for username in active_players:
+        player = active_players[username]
+
+        if player.on_fish == winning_fish_name:
+            #added - to take into account different bet types: win, place, each_way
+            match player.getBetType():
+                case BetType.WIN:
+                    winning_odds_multiplier = winning_odds
+                case BetType.PLACE:
+                    winning_odds_multiplier = winning_odds / 2
+                case BetType.EACH_WAY:
+                    winning_odds_multiplier = winning_odds + (winning_odds / 2)
+
+            stake = player.getBet()
+            payout = (stake * winning_odds * winning_odds_multiplier) + stake # added stake to replicate real betting payouts
+            player.get_payout(payout)
+            print(f"[SYSTEM] {username} won! New balance: {player.balance}")
+        
+        player.on_fish = None
+        player.player_bet = 0
+
 # --- API ROUTES/CALLS ---
 
 @app.route("/")
@@ -84,6 +129,7 @@ def sendBet():
     username = request.args.get('username')
     stake = request.args.get('stake')
     on_fish = request.args.get('on_fish')
+    bet_type = BetType(request.args.get('bet_type')) #added
 
     if not username or not stake:
         return "<p>Error: Missing username or stake.</p>"
@@ -95,14 +141,46 @@ def sendBet():
     
     try:
         stake_amount = float(stake)
-        current_player.place_bet(stake_amount, on_fish) # adds amount to player's bet
+        current_player.place_bet(stake_amount, on_fish, bet_type) # adds amount to player's bet
         return f"<p>Bet places. Balance: {current_player.balance}</p>"
-    except ValueError:
-        return "<p>Error: Stake must be a number</p>"
-        
+    except ValueError as e:
+        return "<p>Error: Stake must be a number</p><p>" + str(e) + "</p>"
+
+@app.route("/api/getFishNames", methods=["GET"])
+def getFishNames():
+    global active_race_data
+    df = selectFish()
+    if df is None or df.empty:
+        return jsonify({"error": "No fish found"}), 404
+    
+    active_race_data = df.to_dict('records')
+    names_list = df["Name"].tolist()
+
+    return jsonify({
+        "fish_names": names_list,
+        "count": len(names_list)
+    })
+
+@app.route("/api/debugState")
+def debug_state():
+    return jsonify({
+        "players_online": list(active_players.keys()),
+        "race_data_loaded": len(active_race_data) > 0,
+        "fish_count": len(active_race_data)
+    }) 
+
 @app.route("/api/startRace", methods=["GET"])
 def startRace():
-    df_selected = selectFish()
+    global active_race_data
+
+    if not active_race_data:
+        df_backup = selectFish()
+        if df_backup is not None:
+            active_race_data = df_backup.to_dict('records')
+        else:
+            return jsonify({"error": "CSV is missing and no fish is selected"})
+
+    df_selected = pd.DataFrame(active_race_data)
 
     if df_selected is None or df_selected.empty:
         return "<p>Error: fish.csv is missing or empty</p>"
@@ -129,19 +207,25 @@ def startRace():
             if player.on_fish == f.getName():
                 f.addBet(player.getUsername())
 
-        # f.odds = float(data["Odds"])
-        # f.normalised_odds = float(data["NormOdds"])
-        # f.sprite = data["Sprite"]
+        f.odds = float(data["Odds"])
+        f.normalised_odds = float(data["NormOdds"])
+        f.sprite = data["Sprite"]
 
         current_fishes.append(f)
 
+    race_history = []
     tick_count = 0
 
     while not calculateAllFinished(current_fishes):
         tick_count += 1
-
         updateFishLocations(current_fishes, normOdds)
+        snapshot = {
+            "positions": {f.getName(): round(f.getXPosition(), 2) for f in current_fishes},
+            "tick": tick_count
+            }
+        race_history.append(snapshot)
 
+        # DEBUG MESSAGES    
         print(f"Tick {tick_count}:")
         for fish in current_fishes:
             print(f"{fish.getName()} position: {fish.getXPosition()}")
@@ -156,15 +240,17 @@ def startRace():
     # positions_str = ",".join([f"{f.getName()}={f.sprite}={round(f.getXPosition(), 2)}" for f in current_fishes])
     # response_text = f"{winner.getName()}|{tick_count}|{positions_str}"
 
-    return f"Winner: {winner.getName()}, Time: {tick_count}"
+    # Update each fish's odds in CSV
+    updateCsvOdds(sorted(current_fishes, key=lambda f: f.getXPosition(), reverse=True))
+    
+    print(f"\n[DEBUG] Race Finished. Winner identified as: {winner.getName()}")
+    process_payouts(winner.getName(), winner.odds)
+
+    return jsonify({
+        "winner": winner.getName(),
+        "total_ticks": tick_count,
+        "history": race_history
+    })
 
 if __name__ == "__main__":
     app.run(port=5000, debug=True)
-
-# @app.route("/test/<sendUname>")
-# def sendUname(sendUname):
-#     return "<p>username: "+sendUname+"</p>"
-
-
-# if __name__ == "__main__":
-#     app.run(debug=True)

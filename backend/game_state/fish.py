@@ -4,11 +4,17 @@ class Fish():
     fish_name : str
     player_bets : list[str] #Bet]
     x_position : float
+    odds: float
+    normalised_odds: float
+    sprite: str
 
     def __init__(self, fish_name: str):
         self.fish_name = fish_name
         self.player_bets = []
         self.x_position = 0
+        self.odds = 0.0
+        self.normalised_odds = 0.0
+        self.sprite = ""
 
     def getName(self):
         return self.fish_name
@@ -24,3 +30,6 @@ class Fish():
 
     def addBet(self, new_bet: str): #Bet):
         self.player_bets.append(new_bet)
+
+    def getOdds(self):
+        return self.odds
