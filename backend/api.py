@@ -55,6 +55,20 @@ def calculateAllFinished(fishes: list[Fish]):
 
     return False
 
+def updateCsvOdds(positions: list[int]):
+    df = getFishCsv()
+  
+    # given a sigmoid distribution of fish positions, calculate new odds
+    newOdds = []
+    for pos in positions:
+        newOdds.append((-(1/(1 + np.exp(5 - pos))) + 0.5) / 10)
+    
+    oldOdds = df["Odds"].tolist()
+    df["Odds"] = list(map(lambda old, new: (old + new) / 2, oldOdds, newOdds))
+    print(f"[DEBUG] Updated odds:\n{df}\n")
+    # df.to_csv(Path("../fish.csv"), index=False) # overwrites the original csv file
+    return df
+
 def process_payouts(winning_fish_name, winning_odds):
     print(f"\n[DEBUG] --- PROCESSING PAYOUTS ---")
     print(f"[DEBUG] Winner: '{winning_fish_name}' | Odds: {winning_odds}")
@@ -211,6 +225,9 @@ def startRace():
 
     # positions_str = ",".join([f"{f.getName()}={f.sprite}={round(f.getXPosition(), 2)}" for f in current_fishes])
     # response_text = f"{winner.getName()}|{tick_count}|{positions_str}"
+
+    # Update each fish's odds in CSV
+    updateCsvOdds([f.getXPosition() for f in current_fishes])
     
     print(f"\n[DEBUG] Race Finished. Winner identified as: {winner.getName()}")
     process_payouts(winner.getName(), winner.odds)
