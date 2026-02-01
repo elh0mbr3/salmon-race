@@ -1,5 +1,0 @@
-npm i
-npm run dev
-cd backend
-pip install requirements.txt
-python app.py
