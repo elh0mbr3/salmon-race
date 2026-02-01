@@ -4,6 +4,7 @@ import Image from "next/image";
 import styles from "./page.module.css";
 import Buttons from "./components/buttons";
 import { useState, useEffect, useRef } from "react";
+import confetti from "canvas-confetti";
 
 import salmon1 from "./assets/pictures of salmon/1.png";
 import salmon2 from "./assets/pictures of salmon/2.png";
@@ -195,6 +196,12 @@ export default function Home() {
       const animationDuration = result.history.length * 50;
       setTimeout(async () => {
         setWinner(result.winner);
+        // Trigger confetti celebration!
+        confetti({
+          particleCount: 150,
+          spread: 100,
+          origin: { y: 0.6 },
+        });
         // refresh balance after race and calculate profit/loss
         if (username) {
           try {
@@ -204,7 +211,7 @@ export default function Home() {
             if (response.ok) {
               const data = await response.json();
               setBalance(data.balance);
-              // Calculate profit/loss using ref
+              // calculating profit/loss using ref
               if (balanceBeforeRaceRef.current !== null) {
                 setProfitLoss(data.balance - balanceBeforeRaceRef.current);
               }
