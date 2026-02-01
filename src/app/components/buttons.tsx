@@ -12,6 +12,11 @@ export default function Buttons({ onStartRace, raceStarted }: ButtonsProps) {
   var thingymajiggywhatchamacallit;
   return (
     <div>
+      <select id="bet_type">
+        <option value="win">Win</option>
+        <option value="place">Place</option>
+        <option value="each_way">Each Way</option>
+      </select>
       <button
         className={styles.actionButton}
         onClick={() => {
@@ -20,7 +25,7 @@ export default function Buttons({ onStartRace, raceStarted }: ButtonsProps) {
           );
           if (thingymajiggywhatchamacallit != null) {
             thingymajiggywhatchamacallit = parseInt(
-              thingymajiggywhatchamacallit,
+              thingymajiggywhatchamacallit
             );
             if (
               !isNaN(thingymajiggywhatchamacallit) &&
@@ -28,6 +33,8 @@ export default function Buttons({ onStartRace, raceStarted }: ButtonsProps) {
               thingymajiggywhatchamacallit < 11
             ) {
               console.log(thingymajiggywhatchamacallit - 1);
+              {/* @ts-ignore */}
+              console.log(document.getElementById("bet_type").value);
             }
           }
         }}
