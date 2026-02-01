@@ -59,13 +59,30 @@ export default function Home() {
   const [winner, setWinner] = useState<string | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
   const [username, setUsername] = useState<string | null>(null);
+  const [balance, setBalance] = useState<number | null>(null);
   const animationRef = useRef<number | null>(null);
+
+  // function to fetch user balance
+  const fetchBalance = async (user: string) => {
+    try {
+      const response = await fetch(
+        `/api/getBalance?username=${encodeURIComponent(user)}`,
+      );
+      if (response.ok) {
+        const data = await response.json();
+        setBalance(data.balance);
+      }
+    } catch (error) {
+      console.error("Failed to fetch balance:", error);
+    }
+  };
 
   // initialising username on mount
   useEffect(() => {
     const storedUsername = localStorage.getItem("salmonRaceUsername");
     if (storedUsername) {
       setUsername(storedUsername);
+      fetchBalance(storedUsername);
     } else {
       const newUsername = prompt(
         "Welcome to Salmon Race! Enter your username:",
@@ -74,9 +91,9 @@ export default function Home() {
         localStorage.setItem("salmonRaceUsername", newUsername);
         setUsername(newUsername);
         // registering with backend
-        fetch(
-          `/api/sendUname?username=${encodeURIComponent(newUsername)}`,
-        ).catch(console.error);
+        fetch(`/api/sendUname?username=${encodeURIComponent(newUsername)}`)
+          .then(() => fetchBalance(newUsername))
+          .catch(console.error);
       }
     }
   }, []);
@@ -170,6 +187,10 @@ export default function Home() {
       const animationDuration = result.history.length * 50;
       setTimeout(() => {
         setWinner(result.winner);
+        // refresh balance after race
+        if (username) {
+          fetchBalance(username);
+        }
       }, animationDuration);
     } catch (error) {
       console.error("Error starting race:", error);
@@ -190,6 +211,12 @@ export default function Home() {
   return (
     <div className={styles.page}>
       <main className={styles.main}>
+        <div className={styles.balanceDisplay}>
+          <span className={styles.balanceLabel}>Balance:</span>
+          <span className={styles.balanceAmount}>
+            ${balance !== null ? balance.toLocaleString() : "..."}
+          </span>
+        </div>
         <Image
           className={styles.projectLogo}
           src="/logo.png"

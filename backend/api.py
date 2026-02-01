@@ -161,6 +161,23 @@ def getFishNames():
         "count": len(names_list)
     })
 
+@app.route("/api/getBalance", methods=["GET"])
+def getBalance():
+    username = request.args.get('username')
+    
+    if not username:
+        return jsonify({"error": "No username provided"}), 400
+    
+    player = active_players.get(username)
+    
+    if not player:
+        # Player not found, create them with default balance
+        new_player = Player(username)
+        active_players[username] = new_player
+        return jsonify({"balance": new_player.balance, "username": username})
+    
+    return jsonify({"balance": player.balance, "username": username})
+
 @app.route("/api/debugState")
 def debug_state():
     return jsonify({

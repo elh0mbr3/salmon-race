@@ -70,7 +70,7 @@ export default function Buttons({
 
             try {
               const response = await fetch(
-                `/api/sendBet?username=${encodeURIComponent(username)}&stake=${stake}&on_fish=${encodeURIComponent(fishName)}&bet_type=${encodeURIComponent(document.getElementById('bet_type').value)}`,
+                `/api/sendBet?username=${encodeURIComponent(username)}&stake=${stake}&on_fish=${encodeURIComponent(fishName)}&bet_type=${encodeURIComponent(document.getElementById("bet_type").value)}`,
               );
               if (response.ok) {
                 alert(`Bet placed! $${stake} on ${fishName}`);
