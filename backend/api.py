@@ -84,16 +84,17 @@ def process_payouts(winning_fish_name, winning_odds):
             #added - to take into account different bet types: win, place, each_way
             match player.getBetType():
                 case BetType.WIN:
-                    winning_odds_multiplier = winning_odds
+                    winning_odds_multiplier = 1 / winning_odds  # higher payout for lower odds fish
                 case BetType.PLACE:
-                    winning_odds_multiplier = winning_odds / 2
+                    winning_odds_multiplier = (1 / winning_odds) / 2
                 case BetType.EACH_WAY:
-                    winning_odds_multiplier = winning_odds + (winning_odds / 2)
+                    winning_odds_multiplier = (1 / winning_odds) + ((1 / winning_odds) / 2)
 
             stake = player.getBet()
-            payout = (stake * winning_odds * winning_odds_multiplier) + stake # added stake to replicate real betting payouts
+            # payout = original stake + winnings (stake * multiplier)
+            payout = stake + (stake * winning_odds_multiplier)
             player.get_payout(payout)
-            print(f"[SYSTEM] {username} won! New balance: {player.balance}")
+            print(f"[SYSTEM] {username} won! Stake: {stake}, Payout: {payout}, New balance: {player.balance}")
         
         player.on_fish = None
         player.player_bet = 0

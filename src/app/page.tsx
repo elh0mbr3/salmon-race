@@ -196,7 +196,7 @@ export default function Home() {
       const animationDuration = result.history.length * 50;
       setTimeout(async () => {
         setWinner(result.winner);
-        // Trigger confetti celebration!
+        // triggering confetti celebration!
         confetti({
           particleCount: 150,
           spread: 100,
