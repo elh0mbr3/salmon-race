@@ -6,7 +6,7 @@ from pathlib import Path
 from flask import Flask, request, session, jsonify
 
 # importing classes
-from game_state.player import Player
+from game_state.player import Player, BetType # added to
 from game_state.fish import Fish
 # from game_state.race import Race, BetType
 
@@ -55,18 +55,22 @@ def calculateAllFinished(fishes: list[Fish]):
 
     return False
 
-def updateCsvOdds(positions: list[int]):
+# updat the fish odds in the csv file based on their finishing positions
+def updateCsvOdds(fishes: list[Fish]):
     df = getFishCsv()
   
     # given a sigmoid distribution of fish positions, calculate new odds
     newOdds = []
-    for pos in positions:
-        newOdds.append((-(1/(1 + np.exp(5 - pos))) + 0.5) / 10)
+    for pos in range(len(fishes)):
+        newOdds.append((0.1 * np.tanh(0.8*(5 - pos))))
     
-    oldOdds = df["Odds"].tolist()
-    df["Odds"] = list(map(lambda old, new: (old + new) / 2, oldOdds, newOdds))
+    #find odds missing in program and copy across csv odds
+    for i, fish in enumerate(fishes):
+        for index, row in df.iterrows():
+            if row["Name"] == fish.getName():
+                df.loc[index, "Odds"] = min(0.5, abs(fish.getOdds() + newOdds[i]) + 0.05)  # never go above 0.5
     print(f"[DEBUG] Updated odds:\n{df}\n")
-    # df.to_csv(Path("../fish.csv"), index=False) # overwrites the original csv file
+    df.to_csv(Path("../fish.csv"), index=False) # overwrites the original csv file
     return df
 
 def process_payouts(winning_fish_name, winning_odds):
@@ -77,8 +81,17 @@ def process_payouts(winning_fish_name, winning_odds):
         player = active_players[username]
 
         if player.on_fish == winning_fish_name:
+            #added - to take into account different bet types: win, place, each_way
+            match player.getBetType():
+                case BetType.WIN:
+                    winning_odds_multiplier = winning_odds
+                case BetType.PLACE:
+                    winning_odds_multiplier = winning_odds / 2
+                case BetType.EACH_WAY:
+                    winning_odds_multiplier = winning_odds + (winning_odds / 2)
+
             stake = player.getBet()
-            payout = stake * winning_odds
+            payout = (stake * winning_odds * winning_odds_multiplier) + stake # added stake to replicate real betting payouts
             player.get_payout(payout)
             print(f"[SYSTEM] {username} won! New balance: {player.balance}")
         
@@ -116,6 +129,7 @@ def sendBet():
     username = request.args.get('username')
     stake = request.args.get('stake')
     on_fish = request.args.get('on_fish')
+    bet_type = BetType(request.args.get('bet_type')) #added
 
     if not username or not stake:
         return "<p>Error: Missing username or stake.</p>"
@@ -127,10 +141,10 @@ def sendBet():
     
     try:
         stake_amount = float(stake)
-        current_player.place_bet(stake_amount, on_fish) # adds amount to player's bet
+        current_player.place_bet(stake_amount, on_fish, bet_type) # adds amount to player's bet
         return f"<p>Bet places. Balance: {current_player.balance}</p>"
-    except ValueError:
-        return "<p>Error: Stake must be a number</p>"
+    except ValueError as e:
+        return "<p>Error: Stake must be a number</p><p>" + str(e) + "</p>"
 
 @app.route("/api/getFishNames", methods=["GET"])
 def getFishNames():
@@ -227,7 +241,7 @@ def startRace():
     # response_text = f"{winner.getName()}|{tick_count}|{positions_str}"
 
     # Update each fish's odds in CSV
-    updateCsvOdds([f.getXPosition() for f in current_fishes])
+    updateCsvOdds(sorted(current_fishes, key=lambda f: f.getXPosition(), reverse=True))
     
     print(f"\n[DEBUG] Race Finished. Winner identified as: {winner.getName()}")
     process_payouts(winner.getName(), winner.odds)

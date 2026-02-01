@@ -30,3 +30,6 @@ class Fish():
 
     def addBet(self, new_bet: str): #Bet):
         self.player_bets.append(new_bet)
+
+    def getOdds(self):
+        return self.odds
