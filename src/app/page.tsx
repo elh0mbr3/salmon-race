@@ -3,7 +3,7 @@
 import Image from "next/image";
 import styles from "./page.module.css";
 import Buttons from "./components/buttons";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 
 import salmon1 from "./assets/pictures of salmon/1.png";
 import salmon2 from "./assets/pictures of salmon/2.png";
@@ -20,6 +20,12 @@ const spriteMap: { [key: number]: typeof salmon1 } = {
 };
 
 type FishData = { name: string; odds: number; sprite: number };
+type RaceSnapshot = { positions: { [fishName: string]: number }; tick: number };
+type RaceResult = {
+  winner: string;
+  total_ticks: number;
+  history: RaceSnapshot[];
+};
 
 function parseCSV(csv: string): FishData[] {
   const lines = csv.trim().split("\n");
@@ -47,21 +53,139 @@ function shuffleArray<T>(array: T[]): T[] {
 export default function Home() {
   const [selectedFish, setSelectedFish] = useState<FishData[]>([]);
   const [raceStarted, setRaceStarted] = useState(false);
+  const [fishPositions, setFishPositions] = useState<{
+    [name: string]: number;
+  }>({});
+  const [winner, setWinner] = useState<string | null>(null);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [username, setUsername] = useState<string | null>(null);
+  const animationRef = useRef<number | null>(null);
+
+  // initialising username on mount
+  useEffect(() => {
+    const storedUsername = localStorage.getItem("salmonRaceUsername");
+    if (storedUsername) {
+      setUsername(storedUsername);
+    } else {
+      const newUsername = prompt(
+        "Welcome to Salmon Race! Enter your username:",
+      );
+      if (newUsername) {
+        localStorage.setItem("salmonRaceUsername", newUsername);
+        setUsername(newUsername);
+        // registering with backend
+        fetch(
+          `/api/sendUname?username=${encodeURIComponent(newUsername)}`,
+        ).catch(console.error);
+      }
+    }
+  }, []);
 
   useEffect(() => {
-    fetch("/fish.csv")
-      .then((response) => response.text())
-      .then((csv) => {
-        const fishData = parseCSV(csv);
-        const shuffled = shuffleArray(fishData);
-        const selected = shuffled.slice(0, 10);
-        setSelectedFish(selected);
+    // fetching from backend API first, fallback to CSV
+    fetch("/api/getFishNames")
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Backend not available");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        // backend returns just names, we need to get full data from CSV
+        // fetch CSV to get odds and sprites for the selected fish names
+        return fetch("/fish.csv")
+          .then((res) => res.text())
+          .then((csv) => {
+            const allFish = parseCSV(csv);
+            const selectedNames: string[] = data.fish_names;
+            // filtering to only fish selected by backend
+            const selected = selectedNames
+              .map((name: string) => allFish.find((f) => f.name === name))
+              .filter((f): f is FishData => f !== undefined);
+            setSelectedFish(selected);
+            // initialising positions
+            const initialPositions: { [name: string]: number } = {};
+            selected.forEach((fish) => {
+              initialPositions[fish.name] = 0;
+            });
+            setFishPositions(initialPositions);
+          });
+      })
+      .catch(() => {
+        // fallback to CSV only
+        console.log("Backend not available, using CSV fallback");
+        fetch("/fish.csv")
+          .then((response) => response.text())
+          .then((csv) => {
+            const fishData = parseCSV(csv);
+            const shuffled = shuffleArray(fishData);
+            const selected = shuffled.slice(0, 10);
+            setSelectedFish(selected);
+            // initialising positions
+            const initialPositions: { [name: string]: number } = {};
+            selected.forEach((fish) => {
+              initialPositions[fish.name] = 0;
+            });
+            setFishPositions(initialPositions);
+          });
       });
   }, []);
 
-  const handleStartRace = () => {
-    setRaceStarted(true);
+  const animateRace = (history: RaceSnapshot[]) => {
+    setIsAnimating(true);
+    let currentTick = 0;
+
+    const playNextTick = () => {
+      if (currentTick >= history.length) {
+        setIsAnimating(false);
+        return;
+      }
+
+      const snapshot = history[currentTick];
+      setFishPositions(snapshot.positions);
+      currentTick++;
+
+      // adjusting speed - 50ms per tick
+      animationRef.current = window.setTimeout(playNextTick, 50);
+    };
+
+    playNextTick();
   };
+
+  const handleStartRace = async () => {
+    setRaceStarted(true);
+    setWinner(null);
+
+    try {
+      const response = await fetch("/api/startRace");
+      if (!response.ok) {
+        throw new Error("Failed to start race");
+      }
+      const result: RaceResult = await response.json();
+
+      // animating the race using the history
+      animateRace(result.history);
+
+      // setting winner after animation completes
+      const animationDuration = result.history.length * 50;
+      setTimeout(() => {
+        setWinner(result.winner);
+      }, animationDuration);
+    } catch (error) {
+      console.error("Error starting race:", error);
+      // fallback to simple animation if backend fails
+      setIsAnimating(false);
+    }
+  };
+
+  // cleanup animation on unmount
+  useEffect(() => {
+    return () => {
+      if (animationRef.current) {
+        clearTimeout(animationRef.current);
+      }
+    };
+  }, []);
 
   return (
     <div className={styles.page}>
@@ -92,13 +216,25 @@ export default function Home() {
                   alt={fish.name}
                   width={80}
                   height={40}
+                  style={{
+                    left: `calc((100% - 80px) * ${(fishPositions[fish.name] || 0) / 100})`,
+                    transition: isAnimating ? "left 50ms linear" : "none",
+                  }}
                 />
               </div>
             ))}
           </div>
         </div>
+        {winner && (
+          <div className={styles.winnerBanner}>🏆 Winner: {winner}! 🏆</div>
+        )}
         <div>
-          <Buttons onStartRace={handleStartRace} raceStarted={raceStarted} />
+          <Buttons
+            onStartRace={handleStartRace}
+            raceStarted={raceStarted}
+            fishNames={selectedFish.map((f) => f.name)}
+            username={username || undefined}
+          />
         </div>
       </main>
     </div>
