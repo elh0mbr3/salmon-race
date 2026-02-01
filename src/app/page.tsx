@@ -304,6 +304,7 @@ export default function Home() {
             raceStarted={raceStarted}
             fishNames={selectedFish.map((f) => f.name)}
             username={username || undefined}
+            balance={balance}
           />
         </div>
       </main>

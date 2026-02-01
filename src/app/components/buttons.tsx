@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import styles from "../page.module.css";
 
 interface ButtonsProps {
@@ -8,6 +8,7 @@ interface ButtonsProps {
   raceStarted: boolean;
   fishNames?: string[];
   username?: string;
+  balance?: number | null;
 }
 
 export default function Buttons({
@@ -15,9 +16,55 @@ export default function Buttons({
   raceStarted,
   fishNames = [],
   username,
+  balance,
 }: ButtonsProps) {
   const [selectedFish, setSelectedFish] = useState<string | null>(null);
   const [betAmount, setBetAmount] = useState<number>(10);
+  const betTypeRef = useRef<HTMLSelectElement>(null);
+
+  // helper function to get valid bet amount
+  const getValidBetAmount = (fishName: string): number | null => {
+    let stake: number | null = null;
+
+    while (stake === null) {
+      const stakeInput = prompt(
+        `How much would you like to bet on ${fishName}?`,
+        "10",
+      );
+
+      if (stakeInput === null) {
+        // user cancelled
+        return null;
+      }
+
+      const parsedStake = parseFloat(stakeInput);
+
+      if (isNaN(parsedStake) || parsedStake <= 0) {
+        alert("Please enter a valid positive amount.");
+        continue;
+      }
+
+      if (balance !== null && balance !== undefined && parsedStake > balance) {
+        alert(
+          `You don't have enough balance! Your current balance is $${balance.toLocaleString()}. Please enter a smaller amount.`,
+        );
+        continue;
+      }
+
+      // checking if betting entire balance
+      if (
+        balance !== null &&
+        balance !== undefined &&
+        parsedStake === balance
+      ) {
+        alert("LET'S GO GAMBLING!!!!!!!!!!");
+      }
+
+      stake = parsedStake;
+    }
+
+    return stake;
+  };
 
   const handlePlaceBet = async () => {
     if (!username) {
@@ -59,28 +106,23 @@ export default function Buttons({
         const fishName = fishNames[fishIndex - 1];
         setSelectedFish(fishName);
 
-        const stakeInput = prompt(
-          `How much would you like to bet on ${fishName}?`,
-          "10",
-        );
-        if (stakeInput) {
-          const stake = parseFloat(stakeInput);
-          if (!isNaN(stake) && stake > 0) {
-            setBetAmount(stake);
+        const stake = getValidBetAmount(fishName);
+        if (stake !== null) {
+          setBetAmount(stake);
 
-            try {
-              const response = await fetch(
-                `/api/sendBet?username=${encodeURIComponent(username)}&stake=${stake}&on_fish=${encodeURIComponent(fishName)}&bet_type=${encodeURIComponent(document.getElementById("bet_type").value)}`,
-              );
-              if (response.ok) {
-                alert(`Bet placed! $${stake} on ${fishName}`);
-              } else {
-                alert("Failed to place bet. Please try again.");
-              }
-            } catch (error) {
-              console.error("Error placing bet:", error);
-              alert("Error connecting to server.");
+          try {
+            const betType = betTypeRef.current?.value || "win";
+            const response = await fetch(
+              `/api/sendBet?username=${encodeURIComponent(username)}&stake=${stake}&on_fish=${encodeURIComponent(fishName)}&bet_type=${encodeURIComponent(betType)}`,
+            );
+            if (response.ok) {
+              alert(`Bet placed! $${stake} on ${fishName}`);
+            } else {
+              alert("Failed to place bet. Please try again.");
             }
+          } catch (error) {
+            console.error("Error placing bet:", error);
+            alert("Error connecting to server.");
           }
         }
       }
@@ -89,7 +131,7 @@ export default function Buttons({
 
   return (
     <div>
-      <select id="bet_type">
+      <select id="bet_type" ref={betTypeRef}>
         <option value="win">Win</option>
         <option value="place">Place</option>
         <option value="each_way">Each Way</option>
