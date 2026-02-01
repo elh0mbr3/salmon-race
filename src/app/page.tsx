@@ -60,7 +60,12 @@ export default function Home() {
   const [isAnimating, setIsAnimating] = useState(false);
   const [username, setUsername] = useState<string | null>(null);
   const [balance, setBalance] = useState<number | null>(null);
+  const [balanceBeforeRace, setBalanceBeforeRace] = useState<number | null>(
+    null,
+  );
+  const [profitLoss, setProfitLoss] = useState<number | null>(null);
   const animationRef = useRef<number | null>(null);
+  const balanceBeforeRaceRef = useRef<number | null>(null);
 
   // function to fetch user balance
   const fetchBalance = async (user: string) => {
@@ -172,6 +177,9 @@ export default function Home() {
   const handleStartRace = async () => {
     setRaceStarted(true);
     setWinner(null);
+    setProfitLoss(null);
+    // Store current balance before race starts using ref to avoid closure issues
+    balanceBeforeRaceRef.current = balance;
 
     try {
       const response = await fetch("/api/startRace");
@@ -185,11 +193,25 @@ export default function Home() {
 
       // setting winner after animation completes
       const animationDuration = result.history.length * 50;
-      setTimeout(() => {
+      setTimeout(async () => {
         setWinner(result.winner);
-        // refresh balance after race
+        // refresh balance after race and calculate profit/loss
         if (username) {
-          fetchBalance(username);
+          try {
+            const response = await fetch(
+              `/api/getBalance?username=${encodeURIComponent(username)}`,
+            );
+            if (response.ok) {
+              const data = await response.json();
+              setBalance(data.balance);
+              // Calculate profit/loss using ref
+              if (balanceBeforeRaceRef.current !== null) {
+                setProfitLoss(data.balance - balanceBeforeRaceRef.current);
+              }
+            }
+          } catch (error) {
+            console.error("Failed to fetch balance:", error);
+          }
         }
       }, animationDuration);
     } catch (error) {
@@ -253,7 +275,21 @@ export default function Home() {
           </div>
         </div>
         {winner && (
-          <div className={styles.winnerBanner}>🏆 Winner: {winner}! 🏆</div>
+          <div className={styles.winnerBanner}>
+            🏆 Winner: {winner}!
+            {profitLoss !== null && (
+              <span
+                className={
+                  profitLoss >= 0 ? styles.profitText : styles.lossText
+                }
+              >
+                {profitLoss >= 0
+                  ? ` (+$${profitLoss.toLocaleString()})`
+                  : ` (-$${Math.abs(profitLoss).toLocaleString()})`}
+              </span>
+            )}
+            {profitLoss === null && " 🏆"}
+          </div>
         )}
         <div>
           <Buttons

@@ -362,3 +362,57 @@ a.secondary {
     box-shadow: 0 6px 30px rgba(255, 215, 0, 0.7);
   }
 }
+
+.profitBanner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 16px 32px;
+  background: linear-gradient(135deg, #00c853 0%, #00e676 50%, #00c853 100%);
+  border-radius: 12px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 16px rgba(0, 200, 83, 0.4);
+  animation: profitPulse 1.2s ease-in-out infinite alternate;
+}
+
+.lossBanner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 16px 32px;
+  background: linear-gradient(135deg, #d32f2f 0%, #f44336 50%, #d32f2f 100%);
+  border-radius: 12px;
+  font-size: 20px;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 16px rgba(211, 47, 47, 0.4);
+}
+
+@keyframes profitPulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 4px 16px rgba(0, 200, 83, 0.4);
+  }
+  100% {
+    transform: scale(1.02);
+    box-shadow: 0 6px 24px rgba(0, 200, 83, 0.6);
+  }
+}
+
+.profitText {
+  color: #00c853;
+  font-weight: 800;
+  margin-left: 8px;
+}
+
+.lossText {
+  color: #d32f2f;
+  font-weight: 800;
+  margin-left: 8px;
+}
